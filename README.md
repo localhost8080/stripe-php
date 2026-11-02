@@ -309,11 +309,7 @@ just test tests/Stripe/UtilTest.php
 # or: ./vendor/bin/phpunit tests/Stripe/UtilTest.php
 ```
 
-Update bundled CA certificates from the [Mozilla cURL release][curl]:
-
-```bash
-./update_certs.php
-```
+The bundled CA certificates in `data/ca-certificates.crt` are Stripe's trusted root certificates (see the [TLS certificates documentation][tls-certificates]). They are not the full Mozilla bundle, so don't replace the file with one.
 
 The library uses [PHP CS Fixer][php-cs-fixer] for code formatting. Code must be formatted before PRs are submitted, otherwise CI will fail. Run the formatter with:
 
@@ -338,7 +334,7 @@ See the "SSL / TLS compatibility issues" paragraph above for full context. If yo
 
 [composer]: https://getcomposer.org/
 [connect]: https://stripe.com/connect
-[curl]: http://curl.haxx.se/docs/caextract.html
+[tls-certificates]: https://docs.stripe.com/tls-certificates
 [idempotency-keys]: https://stripe.com/docs/api/?lang=php#idempotent_requests
 [php-cs-fixer]: https://github.com/FriendsOfPHP/PHP-CS-Fixer
 [psr3]: http://www.php-fig.org/psr/psr-3/
