@@ -242,4 +242,50 @@ final class WebhookTest extends TestCase
 
         Webhook::maybeExtractFromCloudProviderEnvelope($payload);
     }
+
+    public function testSchemeElementWithoutValueRaisesSignatureVerificationException()
+    {
+        $this->expectException(Exception\SignatureVerificationException::class);
+        $this->expectExceptionMessage('No signatures found with expected scheme');
+
+        WebhookSignature::verifyHeader(self::EVENT_PAYLOAD, 't=' . \time() . ',v1', self::SECRET, 300);
+    }
+
+    public function testSchemeElementWithoutValueIsIgnoredNextToValidSignature()
+    {
+        $sigHeader = self::generateHeader() . ',v1';
+        self::assertTrue(WebhookSignature::verifyHeader(self::EVENT_PAYLOAD, $sigHeader, self::SECRET, 300));
+    }
+
+    public function testTimestampElementWithoutValueRaisesSignatureVerificationException()
+    {
+        $this->expectException(Exception\SignatureVerificationException::class);
+        $this->expectExceptionMessage('Unable to extract timestamp and signatures from header');
+
+        WebhookSignature::verifyHeader(self::EVENT_PAYLOAD, 't,v1=abc', self::SECRET, 300);
+    }
+
+    public function testNonIntegerTimestampRaisesSignatureVerificationException()
+    {
+        $this->expectException(Exception\SignatureVerificationException::class);
+        $this->expectExceptionMessage('Unable to extract timestamp and signatures from header');
+
+        $sigHeader = self::generateHeader(['timestamp' => '1e3']);
+        WebhookSignature::verifyHeader(self::EVENT_PAYLOAD, $sigHeader, self::SECRET);
+    }
+
+    public function testNonStringHeaderRaisesSignatureVerificationException()
+    {
+        $this->expectException(Exception\SignatureVerificationException::class);
+        $this->expectExceptionMessage('Signature header must be a string');
+
+        WebhookSignature::verifyHeader(self::EVENT_PAYLOAD, ['t=1', 'v1=abc'], self::SECRET);
+    }
+
+    public function testScalarJsonPayloadRaisesUnexpectedValueException()
+    {
+        $this->expectException(Exception\UnexpectedValueException::class);
+
+        Webhook::constructEventWithoutVerification('123');
+    }
 }

@@ -90,6 +90,11 @@ abstract class Webhook
                 'Invalid JSON payload: ' . \json_last_error_msg()
             );
         }
+        if (!\is_array($data)) {
+            throw new Exception\UnexpectedValueException(
+                'Invalid JSON payload: expected a JSON object'
+            );
+        }
 
         return $data;
     }

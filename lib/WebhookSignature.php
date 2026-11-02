@@ -25,6 +25,13 @@ abstract class WebhookSignature
      */
     public static function verifyHeader($payload, $header, $secret, $tolerance = null)
     {
+        if (!\is_string($header)) {
+            throw Exception\SignatureVerificationException::factory(
+                'Signature header must be a string',
+                $payload,
+                null
+            );
+        }
         // Extract timestamp and signatures from header
         $timestamp = self::getTimestamp($header);
         $signatures = self::getSignatures($header, self::EXPECTED_SCHEME);
@@ -97,7 +104,7 @@ abstract class WebhookSignature
         foreach ($items as $item) {
             $itemParts = \explode('=', $item, 2);
             if ('t' === $itemParts[0]) {
-                if (!\is_numeric($itemParts[1])) {
+                if (!isset($itemParts[1]) || 1 !== \preg_match('/\A\d+\z/', $itemParts[1])) {
                     return -1;
                 }
 
@@ -123,7 +130,7 @@ abstract class WebhookSignature
 
         foreach ($items as $item) {
             $itemParts = \explode('=', $item, 2);
-            if (\trim($itemParts[0]) === $scheme) {
+            if (\trim($itemParts[0]) === $scheme && isset($itemParts[1])) {
                 $signatures[] = $itemParts[1];
             }
         }
